@@ -89,6 +89,10 @@ func (t Tileset) GridSize() image.Point {
 	return t.gridSize
 }
 
+func (t Tileset) Image() image.Image {
+	return t.img
+}
+
 func (t Tileset) TileSize() int {
 	return t.tileSize
 }

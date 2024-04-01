@@ -17,6 +17,12 @@ type State struct {
 	tileSelection int
 	tileTexture   rl.Texture2D
 
+	canvasRenderTexture rl.RenderTexture2D
+
+	palette     []color.RGBA
+	bgSelection int
+	fgSelection int
+
 	tilepickerSpacing float32
 }
 
@@ -30,14 +36,26 @@ func NewState(params StateParams) State {
 	}
 }
 
-func (s *State) NewImage(w, h int, palette color.Palette) {
-	img, err := textmode.NewImage(w, h, s.tileset, palette)
+func (s *State) NewImage(w, h int, palette []color.RGBA) {
+	imgPalette := make(color.Palette, len(palette))
+	for i, c := range palette {
+		imgPalette[i] = c
+	}
+	img, err := textmode.NewImage(w, h, s.tileset, imgPalette)
 	if err != nil {
 		panic(img)
 	}
 
+	s.canvasRenderTexture = rl.LoadRenderTexture(int32(w*s.tileSize), int32(h*s.tileSize))
+	rl.BeginTextureMode(s.canvasRenderTexture)
+	rl.DrawRectangle(0, 0, int32(w*s.tileSize), int32(h*s.tileSize), palette[0])
+	rl.EndTextureMode()
+
 	s.image = img
 	s.imageSize = image.Pt(w, h)
+	s.palette = palette
+	s.bgSelection = 0
+	s.fgSelection = 1
 }
 
 func (s *State) LoadTileset(img *rl.Image, size int) {
@@ -47,9 +65,12 @@ func (s *State) LoadTileset(img *rl.Image, size int) {
 		panic(err)
 	}
 
+	tilesetImage := rl.NewImageFromImage(tileset.Image())
+	rl.ImageColorReplace(tilesetImage, color.RGBA{0, 0, 0, 255}, color.RGBA{0, 0, 0, 0})
+
 	s.tileset = tileset
 	s.tileSize = size
-	s.tileTexture = rl.LoadTextureFromImage(img)
+	s.tileTexture = rl.LoadTextureFromImage(tilesetImage)
 }
 
 func (s State) boundsForTilepickerCell(cell textmode.Cell) rl.Rectangle {

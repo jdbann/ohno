@@ -35,7 +35,8 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 		for x := 0; x < tileGridSize.X; x++ {
 			sourceRec := imageRecToRl(state.tileset.BoundsAtIndex(tileIdx))
 			destRec := recTranslate(state.innerBoundsForCoords(textmode.Cell{x, y}), gridOrigin)
-			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, rl.Vector2{}, 0, rl.White)
+			rl.DrawRectanglePro(destRec, rl.Vector2{}, 0, state.palette[state.bgSelection])
+			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, rl.Vector2{}, 0, state.palette[state.fgSelection])
 
 			tileIdx++
 		}
