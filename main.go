@@ -8,17 +8,23 @@ import (
 )
 
 var (
-	windowBounds = rl.NewRectangle(0, 0, 1280, 720)
+	windowBounds         = rl.NewRectangle(0, 0, 1280, 720)
+	sidebarWidth float32 = 320
 
-	tilepickerWidth  float32 = 320
-	tilepickerBounds         = rl.NewRectangle(
-		windowBounds.Width-tilepickerWidth, 0,
-		tilepickerWidth, windowBounds.Height,
+	colorpickerHeight float32 = 180
+	colorpickerBounds         = rl.NewRectangle(
+		windowBounds.Width-sidebarWidth, windowBounds.Height-colorpickerHeight,
+		sidebarWidth, colorpickerHeight,
+	)
+
+	tilepickerBounds = rl.NewRectangle(
+		windowBounds.Width-sidebarWidth, 0,
+		sidebarWidth, windowBounds.Height-colorpickerHeight,
 	)
 
 	canvasBounds = rl.NewRectangle(
 		0, 0,
-		windowBounds.Width-tilepickerWidth, windowBounds.Height,
+		windowBounds.Width-sidebarWidth, windowBounds.Height,
 	)
 )
 
@@ -43,6 +49,7 @@ func main() {
 
 		ui.Tilepicker(tilepickerBounds, &state)
 		ui.Canvas(canvasBounds, &state)
+		ui.Colorpicker(colorpickerBounds, &state)
 
 		rl.EndDrawing()
 	}
