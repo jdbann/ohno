@@ -31,7 +31,11 @@ func main() {
 	}
 	state := ui.NewState(stateParams)
 	state.LoadTileset(rl.LoadImage("assets/tileset.png"), 8)
-	state.NewImage(10, 10, color.Palette{})
+	state.NewImage(10, 10, []color.RGBA{
+		{255, 0, 0, 255},
+		{0, 255, 0, 255},
+		{0, 0, 255, 255},
+	})
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
