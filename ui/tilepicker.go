@@ -30,6 +30,43 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 	// Tile grid
 	rui.Grid(gridBounds, "Tile", state.tilepickerCellSize(), 1, &mouseCell)
 
+	// Mouse interaction
+	if mouseCell.X >= 0 && mouseCell.Y >= 0 {
+		mouseRec := recTranslate(state.boundsForTilepickerCell(textmode.Cell{int(mouseCell.X), int(mouseCell.Y)}), gridOrigin)
+		rl.DrawRectangleLinesEx(mouseRec, 1.5, hoverColor)
+
+		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
+			state.tileSelection = state.tileset.IndexForCell(textmode.Cell{int(mouseCell.X), int(mouseCell.Y)})
+		}
+	}
+
+	// Keyboard interaction
+	if rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift) {
+		x := state.tileSelection % tileGridSize.X
+		y := state.tileSelection / tileGridSize.X
+
+		if rl.IsKeyPressed(rl.KeyLeft) {
+			x--
+		} else if rl.IsKeyPressed(rl.KeyRight) {
+			x++
+		} else if rl.IsKeyPressed(rl.KeyUp) {
+			y--
+		} else if rl.IsKeyPressed(rl.KeyDown) {
+			y++
+		}
+
+		if x < 0 || x >= tileGridSize.X {
+			x += tileGridSize.X
+			x = x % tileGridSize.X
+		}
+		if y < 0 || y >= tileGridSize.Y {
+			y += tileGridSize.Y
+			y = y % tileGridSize.Y
+		}
+		state.tileSelection = y*tileGridSize.X + x
+	}
+
+	// Tiles
 	var tileIdx int
 	for y := 0; y < tileGridSize.Y; y++ {
 		for x := 0; x < tileGridSize.X; x++ {
@@ -39,16 +76,6 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, rl.Vector2{}, 0, state.palette[state.fgSelection])
 
 			tileIdx++
-		}
-	}
-
-	// Mouse interaction
-	if mouseCell.X >= 0 && mouseCell.Y >= 0 {
-		mouseRec := recTranslate(state.boundsForTilepickerCell(textmode.Cell{int(mouseCell.X), int(mouseCell.Y)}), gridOrigin)
-		rl.DrawRectangleLinesEx(mouseRec, 1.5, hoverColor)
-
-		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
-			state.tileSelection = state.tileset.IndexForCell(textmode.Cell{int(mouseCell.X), int(mouseCell.Y)})
 		}
 	}
 

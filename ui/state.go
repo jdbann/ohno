@@ -17,6 +17,8 @@ type State struct {
 	tileSelection int
 	tileTexture   rl.Texture2D
 
+	canvasSelection image.Point
+
 	palette     []color.RGBA
 	bgSelection int
 	fgSelection int
