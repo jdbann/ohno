@@ -30,12 +30,9 @@ func NewImage(w, h int, tileset *Tileset, palette color.Palette) (*Image, error)
 func (i Image) At(x, y int) color.Color {
 	idx := i.pxToIndex(image.Pt(x, y))
 
-	tile, err := i.tileset.AtIndex(i.tiles[idx])
-	if err != nil {
-		panic(err)
-	}
+	tile := i.tileset.AtIndex(i.tiles[idx])
 
-	px := tile.(*image.Paletted).ColorIndexAt((x%i.tileset.size)+tile.Bounds().Min.X, (y%i.tileset.size)+tile.Bounds().Min.Y)
+	px := tile.(*image.Paletted).ColorIndexAt((x%i.tileset.tileSize)+tile.Bounds().Min.X, (y%i.tileset.tileSize)+tile.Bounds().Min.Y)
 
 	if px == 0 {
 		return i.palette[i.bgColors[idx]]
@@ -44,7 +41,7 @@ func (i Image) At(x, y int) color.Color {
 }
 
 func (i Image) Bounds() image.Rectangle {
-	return image.Rect(0, 0, i.w*i.tileset.size, i.h*i.tileset.size)
+	return image.Rect(0, 0, i.w*i.tileset.tileSize, i.h*i.tileset.tileSize)
 }
 
 func (i Image) ColorModel() color.Model {
@@ -60,7 +57,7 @@ func (i *Image) Set(x, y, tile, bg, fg int) error {
 }
 
 func (i Image) pxToIndex(pt image.Point) int {
-	return pt.Y/i.tileset.size*i.w + pt.X/i.tileset.size
+	return pt.Y/i.tileset.tileSize*i.w + pt.X/i.tileset.tileSize
 }
 
 func (i Image) tileToIndex(pt image.Point) int {
