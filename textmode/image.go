@@ -40,6 +40,11 @@ func (i Image) At(x, y int) color.Color {
 	return i.palette[i.fgColors[idx]]
 }
 
+func (i Image) AtCell(cell Cell) (int, int, int) {
+	idx := i.tileToIndex(cell)
+	return i.tiles[idx], i.bgColors[idx], i.fgColors[idx]
+}
+
 func (i Image) Bounds() image.Rectangle {
 	return image.Rect(0, 0, i.w*i.tileset.tileSize, i.h*i.tileset.tileSize)
 }
