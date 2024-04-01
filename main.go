@@ -1,6 +1,8 @@
 package main
 
 import (
+	"image/color"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/jdbann/ohno/ui"
 )
@@ -13,22 +15,30 @@ var (
 		windowBounds.Width-tilepickerWidth, 0,
 		tilepickerWidth, windowBounds.Height,
 	)
+
+	canvasBounds = rl.NewRectangle(
+		0, 0,
+		windowBounds.Width-tilepickerWidth, windowBounds.Height,
+	)
 )
 
 func main() {
 	rl.InitWindow(windowBounds.ToInt32().Width, windowBounds.ToInt32().Height, "ohno")
 	defer rl.CloseWindow()
 
-	tilepickerState := &ui.TilepickerState{
-		Spacing: 1,
+	stateParams := ui.StateParams{
+		TilepickerSpacing: 1,
 	}
-	tilepickerState.LoadTileset(rl.LoadImage("assets/tileset.png"), 8)
+	state := ui.NewState(stateParams)
+	state.LoadTileset(rl.LoadImage("assets/tileset.png"), 8)
+	state.NewImage(10, 10, color.Palette{})
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
-		ui.Tilepicker(tilepickerBounds, tilepickerState)
+		ui.Tilepicker(tilepickerBounds, &state)
+		ui.Canvas(canvasBounds, &state)
 
 		rl.EndDrawing()
 	}
