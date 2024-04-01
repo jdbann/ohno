@@ -17,8 +17,6 @@ type State struct {
 	tileSelection int
 	tileTexture   rl.Texture2D
 
-	canvasRenderTexture rl.RenderTexture2D
-
 	palette     []color.RGBA
 	bgSelection int
 	fgSelection int
@@ -45,11 +43,6 @@ func (s *State) NewImage(w, h int, palette []color.RGBA) {
 	if err != nil {
 		panic(img)
 	}
-
-	s.canvasRenderTexture = rl.LoadRenderTexture(int32(w*s.tileSize), int32(h*s.tileSize))
-	rl.BeginTextureMode(s.canvasRenderTexture)
-	rl.DrawRectangle(0, 0, int32(w*s.tileSize), int32(h*s.tileSize), palette[0])
-	rl.EndTextureMode()
 
 	s.image = img
 	s.imageSize = image.Pt(w, h)

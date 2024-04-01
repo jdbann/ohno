@@ -3,6 +3,7 @@ package ui
 import (
 	rui "github.com/gen2brain/raylib-go/raygui"
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/jdbann/ohno/textmode"
 )
 
 func Canvas(bounds rl.Rectangle, state *State) {
@@ -22,16 +23,17 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	if mouseCell.X >= 0 && mouseCell.Y >= 0 {
 		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 			state.image.Set(int(mouseCell.X), int(mouseCell.Y), state.tileSelection, state.bgSelection, state.fgSelection)
-
-			rl.BeginTextureMode(state.canvasRenderTexture)
-			sourceRec := imageRecToRl(state.tileset.BoundsAtIndex(state.tileSelection))
-			destRec := rl.NewRectangle(mouseCell.X*float32(state.tileSize), mouseCell.Y*float32(state.tileSize), float32(state.tileSize), float32(state.tileSize))
-			rl.DrawRectanglePro(destRec, rl.Vector2{}, 0, state.palette[state.bgSelection])
-			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, rl.Vector2{}, 0, state.palette[state.fgSelection])
-			rl.EndTextureMode()
 		}
 	}
 
-	imageRec := rl.NewRectangle(0, 0, float32(state.imageSize.X*state.tileSize), -float32(state.imageSize.Y*state.tileSize))
-	rl.DrawTexturePro(state.canvasRenderTexture.Texture, imageRec, gridBounds, rl.Vector2{}, 0, rl.White)
+	// Canvas image
+	for y := 0; y < state.imageSize.Y; y++ {
+		for x := 0; x < state.imageSize.X; x++ {
+			tile, bg, fg := state.image.AtCell(textmode.Cell{x, y})
+			sourceRec := imageRecToRl(state.tileset.BoundsAtIndex(tile))
+			destRec := rl.NewRectangle(float32(x*state.tileSize), float32(y*state.tileSize), float32(state.tileSize), float32(state.tileSize))
+			rl.DrawRectanglePro(destRec, rl.Vector2{}, 0, state.palette[bg])
+			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, rl.Vector2{}, 0, state.palette[fg])
+		}
+	}
 }
