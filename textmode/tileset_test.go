@@ -67,15 +67,17 @@ func TestTileset_At(t *testing.T) {
 	type testCase struct {
 		name    string
 		tileset *textmode.Tileset
-		x, y    int
+		cell    textmode.Cell
+		index   int
 		wantImg image.Image
-		wantErr error
 	}
 
 	run := func(t *testing.T, tc testCase) {
-		actual, err := tc.tileset.At(tc.x, tc.y)
-		assert.ErrorIs(t, err, tc.wantErr)
-		assert.DeepEqual(t, actual, tc.wantImg, cmpImagePixels)
+		cellActual := tc.tileset.AtCell(tc.cell)
+		assert.DeepEqual(t, cellActual, tc.wantImg, cmpImagePixels)
+
+		indexActual := tc.tileset.AtIndex(tc.index)
+		assert.DeepEqual(t, indexActual, tc.wantImg, cmpImagePixels)
 	}
 
 	validTiles := newImage(4, 4, color.Palette{color.Black, color.White}, [][]int{
@@ -95,18 +97,16 @@ func TestTileset_At(t *testing.T) {
 		{
 			name:    "ok",
 			tileset: tileset,
-			x:       1,
-			y:       1,
+			cell:    textmode.Cell{1, 1},
+			index:   3,
 			wantImg: tile11,
-			wantErr: nil,
 		},
 		{
 			name:    "ErrInvalidCoords",
 			tileset: tileset,
-			x:       2,
-			y:       1,
-			wantImg: nil,
-			wantErr: textmode.ErrInvalidCoords,
+			cell:    textmode.Cell{2, 1},
+			index:   4,
+			wantImg: image.Rectangle{},
 		},
 	}
 
@@ -117,19 +117,21 @@ func TestTileset_At(t *testing.T) {
 	}
 }
 
-func TestTileset_AtIndex(t *testing.T) {
+func TestTileset_BoundsAt(t *testing.T) {
 	type testCase struct {
-		name    string
-		tileset *textmode.Tileset
-		index   int
-		wantImg image.Image
-		wantErr error
+		name       string
+		tileset    *textmode.Tileset
+		cell       textmode.Cell
+		index      int
+		wantBounds image.Rectangle
 	}
 
 	run := func(t *testing.T, tc testCase) {
-		actual, err := tc.tileset.AtIndex(tc.index)
-		assert.ErrorIs(t, err, tc.wantErr)
-		assert.DeepEqual(t, actual, tc.wantImg, cmpImagePixels)
+		cellActual := tc.tileset.BoundsAtCell(tc.cell)
+		assert.DeepEqual(t, cellActual, tc.wantBounds)
+
+		indexActual := tc.tileset.BoundsAtIndex(tc.index)
+		assert.DeepEqual(t, indexActual, tc.wantBounds)
 	}
 
 	validTiles := newImage(4, 4, color.Palette{color.Black, color.White}, [][]int{
@@ -138,27 +140,23 @@ func TestTileset_AtIndex(t *testing.T) {
 		{0, 1, 1, 0},
 		{1, 0, 1, 0},
 	})
-	tile11 := newImage(2, 2, color.Palette{color.Black, color.White}, [][]int{
-		{1, 0},
-		{1, 0},
-	})
 	tileset, err := textmode.NewTileset(validTiles, 2)
 	assert.NilError(t, err)
 
 	testCases := []testCase{
 		{
-			name:    "ok",
-			tileset: tileset,
-			index:   3,
-			wantImg: tile11,
-			wantErr: nil,
+			name:       "ok",
+			tileset:    tileset,
+			cell:       textmode.Cell{1, 1},
+			index:      3,
+			wantBounds: image.Rect(2, 2, 4, 4),
 		},
 		{
-			name:    "ErrInvalidCoords",
-			tileset: tileset,
-			index:   4,
-			wantImg: nil,
-			wantErr: textmode.ErrInvalidCoords,
+			name:       "out of bounds",
+			tileset:    tileset,
+			cell:       textmode.Cell{2, 1},
+			index:      4,
+			wantBounds: image.Rectangle{},
 		},
 	}
 
@@ -167,4 +165,30 @@ func TestTileset_AtIndex(t *testing.T) {
 			run(t, tc)
 		})
 	}
+}
+
+func TestTileset_GridSize(t *testing.T) {
+	validTiles := newImage(4, 4, color.Palette{color.Black, color.White}, [][]int{
+		{0, 0, 1, 1},
+		{0, 0, 1, 1},
+		{0, 1, 1, 0},
+		{1, 0, 1, 0},
+	})
+	tileset, err := textmode.NewTileset(validTiles, 2)
+	assert.NilError(t, err)
+
+	assert.DeepEqual(t, tileset.GridSize(), image.Point{2, 2})
+}
+
+func TestTileset_TileSize(t *testing.T) {
+	validTiles := newImage(4, 4, color.Palette{color.Black, color.White}, [][]int{
+		{0, 0, 1, 1},
+		{0, 0, 1, 1},
+		{0, 1, 1, 0},
+		{1, 0, 1, 0},
+	})
+	tileset, err := textmode.NewTileset(validTiles, 2)
+	assert.NilError(t, err)
+
+	assert.Equal(t, tileset.TileSize(), 2)
 }
