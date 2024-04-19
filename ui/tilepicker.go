@@ -67,17 +67,8 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 	}
 
 	// Tiles
-	var tileIdx int
-	for y := 0; y < tileGridSize.Y; y++ {
-		for x := 0; x < tileGridSize.X; x++ {
-			sourceRec := imageRecToRl(state.tileset.BoundsAtIndex(tileIdx))
-			destRec := recTranslate(state.innerBoundsForCoords(textmode.Cell{x, y}), gridOrigin)
-			rl.DrawRectanglePro(destRec, rl.Vector2{}, 0, state.palette[state.bgSelection])
-			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, rl.Vector2{}, 0, state.palette[state.fgSelection])
-
-			tileIdx++
-		}
-	}
+	rl.DrawRectangleRec(gridBounds, state.palette[state.bgSelection])
+	rl.DrawTexture(state.tileTexture, gridBounds.ToInt32().X, gridBounds.ToInt32().Y, state.palette[state.fgSelection])
 
 	// Selected tile
 	selectionRec := recTranslate(state.selectionBounds(), gridOrigin)

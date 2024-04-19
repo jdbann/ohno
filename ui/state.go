@@ -64,10 +64,6 @@ func (s State) tilepickerCellSize() float32 {
 	return float32(s.tileSize)
 }
 
-func (s State) innerBoundsForCoords(cell textmode.Cell) rl.Rectangle {
-	return s.boundsForTilepickerCell(cell)
-}
-
 func (s State) selectionBounds() rl.Rectangle {
 	cell := s.tileset.CellForIndex(s.tileSelection)
 	return s.boundsForTilepickerCell(cell)
@@ -78,15 +74,6 @@ func imageRecToRl(r image.Rectangle) rl.Rectangle {
 		float32(r.Min.X), float32(r.Min.Y),
 		float32(r.Dx()), float32(r.Dy()),
 	)
-}
-
-func recAdd(r rl.Rectangle, v rl.Vector2) rl.Rectangle {
-	return rl.Rectangle{
-		X:      r.X,
-		Y:      r.Y,
-		Width:  r.Width + v.X,
-		Height: r.Height + v.Y,
-	}
 }
 
 func recTranslate(r rl.Rectangle, v rl.Vector2) rl.Rectangle {
