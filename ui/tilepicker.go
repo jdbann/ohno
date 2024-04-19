@@ -77,6 +77,6 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 	rl.DrawTexturePro(state.tileTexture, sourceRec, gridBounds, rl.Vector2{}, 0, state.palette[state.fgSelection])
 
 	// Selected tile
-	selectionRec := recTranslate(recTranslate(state.selectionBounds(), gridOrigin), state.tilepickerScroll)
+	selectionRec := recTranslate(state.selectionBounds(), gridOrigin)
 	rl.DrawRectangleLinesEx(selectionRec, 1.5, selectionColor)
 }
