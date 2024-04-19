@@ -45,17 +45,18 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 	}
 
 	// Keyboard interaction
-	if rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift) {
+	if !(rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift)) {
 		x := state.tileSelection % tileGridSize.X
 		y := state.tileSelection / tileGridSize.X
 
-		if rl.IsKeyPressed(rl.KeyLeft) {
+		switch {
+		case rl.IsKeyPressed(rl.KeyA):
 			x--
-		} else if rl.IsKeyPressed(rl.KeyRight) {
+		case rl.IsKeyPressed(rl.KeyD):
 			x++
-		} else if rl.IsKeyPressed(rl.KeyUp) {
+		case rl.IsKeyPressed(rl.KeyW):
 			y--
-		} else if rl.IsKeyPressed(rl.KeyDown) {
+		case rl.IsKeyPressed(rl.KeyS):
 			y++
 		}
 

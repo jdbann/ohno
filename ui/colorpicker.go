@@ -34,17 +34,18 @@ func Colorpicker(bounds rl.Rectangle, state *State) {
 	}
 
 	// Keyboard interaction
-	if rl.IsKeyDown(rl.KeyLeftAlt) || rl.IsKeyDown(rl.KeyRightAlt) {
+	if rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift) {
 		x := state.fgSelection % colorGridSize.X
 		y := state.fgSelection / colorGridSize.X
 
-		if rl.IsKeyPressed(rl.KeyLeft) {
+		switch {
+		case rl.IsKeyPressed(rl.KeyA):
 			x--
-		} else if rl.IsKeyPressed(rl.KeyRight) {
+		case rl.IsKeyPressed(rl.KeyD):
 			x++
-		} else if rl.IsKeyPressed(rl.KeyUp) {
+		case rl.IsKeyPressed(rl.KeyW):
 			y--
-		} else if rl.IsKeyPressed(rl.KeyDown) {
+		case rl.IsKeyPressed(rl.KeyS):
 			y++
 		}
 

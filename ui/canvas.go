@@ -40,31 +40,30 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	}
 
 	// Keyboard interaction
-	if !(rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift) || rl.IsKeyDown(rl.KeyLeftAlt) || rl.IsKeyDown(rl.KeyRightAlt)) {
-		x := state.canvasSelection.X
-		y := state.canvasSelection.Y
+	x := state.canvasSelection.X
+	y := state.canvasSelection.Y
 
-		if rl.IsKeyPressed(rl.KeyLeft) {
-			x--
-		} else if rl.IsKeyPressed(rl.KeyRight) {
-			x++
-		} else if rl.IsKeyPressed(rl.KeyUp) {
-			y--
-		} else if rl.IsKeyPressed(rl.KeyDown) {
-			y++
-		}
-
-		if x < 0 || x >= state.imageSize.X {
-			x += state.imageSize.X
-			x = x % state.imageSize.X
-		}
-		if y < 0 || y >= state.imageSize.Y {
-			y += state.imageSize.Y
-			y = y % state.imageSize.Y
-		}
-
-		state.canvasSelection = image.Pt(x, y)
+	switch {
+	case rl.IsKeyPressed(rl.KeyLeft):
+		x--
+	case rl.IsKeyPressed(rl.KeyRight):
+		x++
+	case rl.IsKeyPressed(rl.KeyUp):
+		y--
+	case rl.IsKeyPressed(rl.KeyDown):
+		y++
 	}
+
+	if x < 0 || x >= state.imageSize.X {
+		x += state.imageSize.X
+		x = x % state.imageSize.X
+	}
+	if y < 0 || y >= state.imageSize.Y {
+		y += state.imageSize.Y
+		y = y % state.imageSize.Y
+	}
+
+	state.canvasSelection = image.Pt(x, y)
 
 	if rl.IsKeyPressed(rl.KeySpace) {
 		state.image.Set(state.canvasSelection.X, state.canvasSelection.Y, state.tileSelection, state.bgSelection, state.fgSelection)
