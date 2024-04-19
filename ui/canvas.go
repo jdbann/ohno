@@ -13,18 +13,23 @@ func Canvas(bounds rl.Rectangle, state *State) {
 		return
 	}
 
+	cellSize := state.cellSize()
+
 	// Scroll panel
-	canvasBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(state.imageSize.X*state.tileSize), float32(state.imageSize.Y*state.tileSize))
+	canvasBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(state.imageSize.X)*cellSize, float32(state.imageSize.Y)*cellSize)
 	canvasView := rl.Rectangle{}
 	rui.ScrollPanel(bounds, "Canvas", canvasBounds, &state.canvasScroll, &canvasView)
 	centerScrollPanelContents(bounds, canvasBounds, &canvasView)
 	rl.BeginScissorMode(canvasView.ToInt32().X, canvasView.ToInt32().Y, canvasView.ToInt32().Width, canvasView.ToInt32().Height)
 	defer rl.EndScissorMode()
 
+	canvasView.X += state.canvasScroll.X
+	canvasView.Y += state.canvasScroll.Y
+
 	// Canvas grid
 	var mouseCell rl.Vector2
 	gridBounds := rl.NewRectangle(canvasView.X, canvasView.Y, canvasBounds.Width, canvasBounds.Height)
-	rui.Grid(gridBounds, "Canvas", float32(state.tileSize), 1, &mouseCell)
+	rui.Grid(gridBounds, "Canvas", cellSize, 1, &mouseCell)
 
 	// Mouse interaction
 	if mouseCell.X >= 0 && mouseCell.Y >= 0 {
@@ -74,14 +79,14 @@ func Canvas(bounds rl.Rectangle, state *State) {
 		for x := 0; x < state.imageSize.X; x++ {
 			tile, bg, fg := state.image.AtCell(textmode.Cell{x, y})
 			sourceRec := imageRecToRl(state.tileset.BoundsAtIndex(tile))
-			destRec := rl.NewRectangle(float32(x*state.tileSize), float32(y*state.tileSize), float32(state.tileSize), float32(state.tileSize))
+			destRec := rl.NewRectangle(float32(x)*cellSize, float32(y)*cellSize, cellSize, cellSize)
 			rl.DrawRectanglePro(destRec, origin, 0, state.palette[bg])
 			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, origin, 0, state.palette[fg])
 		}
 	}
 
 	// Selection
-	destRec := rl.NewRectangle(canvasView.X+float32(state.canvasSelection.X*state.tileSize), canvasView.Y+float32(state.canvasSelection.Y*state.tileSize), float32(state.tileSize), float32(state.tileSize))
+	destRec := rl.NewRectangle(canvasView.X+float32(state.canvasSelection.X)*cellSize, canvasView.Y+float32(state.canvasSelection.Y)*cellSize, cellSize, cellSize)
 	rl.DrawRectangleLinesEx(destRec, 1.5, selectionColor)
 }
 
@@ -98,10 +103,10 @@ func centerScrollPanelContents(bounds, content rl.Rectangle, view *rl.Rectangle)
 	)
 
 	if content.Width < bounds.Width-2*borderWidth {
-		view.X = (panelSpace.Width - content.Width) / 2
+		view.X = bounds.X + (panelSpace.Width-content.Width)/2
 	}
 
 	if content.Height < panelSpace.Height {
-		view.Y = (panelSpace.Height - content.Height) / 2
+		view.Y = bounds.Y + rayguiWindowboxStatusbarHeight + (panelSpace.Height-content.Height)/2
 	}
 }

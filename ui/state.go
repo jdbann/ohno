@@ -61,6 +61,11 @@ func (s State) boundsForTilepickerCell(cell textmode.Cell) rl.Rectangle {
 	return rl.NewRectangle(float32(cell.X)*s.tilepickerCellSize(), float32(cell.Y)*s.tilepickerCellSize(), s.tilepickerCellSize(), s.tilepickerCellSize())
 }
 
+func (s State) cellSize() float32 {
+	zoom := float32(8)
+	return float32(s.tileSize) * zoom
+}
+
 func (s State) tilepickerCellSize() float32 {
 	return float32(s.tileSize)
 }
