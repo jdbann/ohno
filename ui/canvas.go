@@ -23,16 +23,13 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	rl.BeginScissorMode(canvasView.ToInt32().X, canvasView.ToInt32().Y, canvasView.ToInt32().Width, canvasView.ToInt32().Height)
 	defer rl.EndScissorMode()
 
-	canvasView.X += state.canvasScroll.X
-	canvasView.Y += state.canvasScroll.Y
-
 	// Canvas grid
 	var mouseCell rl.Vector2
-	gridBounds := rl.NewRectangle(canvasView.X, canvasView.Y, canvasBounds.Width, canvasBounds.Height)
+	gridBounds := rl.NewRectangle(canvasView.X+state.canvasScroll.X, canvasView.Y+state.canvasScroll.Y, canvasBounds.Width, canvasBounds.Height)
 	rui.Grid(gridBounds, "Canvas", cellSize, 1, &mouseCell)
 
 	// Mouse interaction
-	if mouseCell.X >= 0 && mouseCell.Y >= 0 {
+	if rl.CheckCollisionPointRec(rl.GetMousePosition(), canvasView) && mouseCell.X >= 0 && mouseCell.Y >= 0 {
 		if rl.GetMouseDelta() != rl.NewVector2(0, 0) {
 			state.canvasSelection = image.Pt(int(mouseCell.X), int(mouseCell.Y))
 		}
@@ -74,7 +71,7 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	}
 
 	// Canvas image
-	origin := rl.NewVector2(-canvasView.X, -canvasView.Y)
+	origin := rl.NewVector2(-canvasView.X-state.canvasScroll.X, -canvasView.Y-state.canvasScroll.Y)
 	for y := 0; y < state.imageSize.Y; y++ {
 		for x := 0; x < state.imageSize.X; x++ {
 			tile, bg, fg := state.image.AtCell(textmode.Cell{x, y})
@@ -86,7 +83,7 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	}
 
 	// Selection
-	destRec := rl.NewRectangle(canvasView.X+float32(state.canvasSelection.X)*cellSize, canvasView.Y+float32(state.canvasSelection.Y)*cellSize, cellSize, cellSize)
+	destRec := rl.NewRectangle(-origin.X+float32(state.canvasSelection.X)*cellSize, -origin.Y+float32(state.canvasSelection.Y)*cellSize, cellSize, cellSize)
 	rl.DrawRectangleLinesEx(destRec, 1.5, selectionColor)
 }
 
