@@ -20,6 +20,8 @@ type State struct {
 	canvasScroll    rl.Vector2
 	canvasSelection image.Point
 
+	tilepickerScroll rl.Vector2
+
 	palette     []color.RGBA
 	bgSelection int
 	fgSelection int
@@ -58,16 +60,12 @@ func (s *State) LoadTileset(img *rl.Image, size int) {
 }
 
 func (s State) boundsForTilepickerCell(cell textmode.Cell) rl.Rectangle {
-	return rl.NewRectangle(float32(cell.X)*s.tilepickerCellSize(), float32(cell.Y)*s.tilepickerCellSize(), s.tilepickerCellSize(), s.tilepickerCellSize())
+	return rl.NewRectangle(float32(cell.X)*s.cellSize(), float32(cell.Y)*s.cellSize(), s.cellSize(), s.cellSize())
 }
 
 func (s State) cellSize() float32 {
 	zoom := float32(8)
 	return float32(s.tileSize) * zoom
-}
-
-func (s State) tilepickerCellSize() float32 {
-	return float32(s.tileSize)
 }
 
 func (s State) selectionBounds() rl.Rectangle {

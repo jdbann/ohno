@@ -15,7 +15,7 @@ func Colorpicker(bounds rl.Rectangle, state *State) {
 
 	var mouseCell rl.Vector2
 	colorGridSize := image.Pt(len(state.palette), 1)
-	gridBounds := rl.NewRectangle(bounds.X+margins["l"], bounds.Y+margins["t"], float32(colorGridSize.X*colorCellSize), float32(colorGridSize.Y*colorCellSize))
+	gridBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(colorGridSize.X*colorCellSize), float32(colorGridSize.Y*colorCellSize))
 
 	// Color grid
 	rui.Grid(gridBounds, "Color", float32(colorCellSize), 1, &mouseCell)

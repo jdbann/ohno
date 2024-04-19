@@ -7,31 +7,35 @@ import (
 )
 
 var (
-	margins = map[string]float32{"t": 36, "r": 12, "b": 12, "l": 12}
-
 	hoverColor     = rl.Red
 	selectionColor = rl.Blue
 )
 
 func Tilepicker(bounds rl.Rectangle, state *State) {
-	// Panel
-	rui.Panel(bounds, "Tilepicker")
-
 	if state.tileTexture.ID == 0 {
 		return
 	}
 
+	cellSize := state.cellSize()
+	tileGridSize := state.tileset.GridSize()
+
+	// Scroll panel
+	tilepickerBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(tileGridSize.X)*cellSize, float32(tileGridSize.Y)*cellSize)
+	tilepickerView := rl.Rectangle{}
+	rui.ScrollPanel(bounds, "Tilepicker", tilepickerBounds, &state.tilepickerScroll, &tilepickerView)
+	rl.BeginScissorMode(tilepickerView.ToInt32().X, tilepickerView.ToInt32().Y, tilepickerView.ToInt32().Width, tilepickerView.ToInt32().Height)
+	defer rl.EndScissorMode()
+
 	var mouseCell rl.Vector2
 
-	tileGridSize := state.tileset.GridSize()
-	gridBounds := rl.NewRectangle(bounds.X+margins["l"], bounds.Y+margins["t"], float32(tileGridSize.X)*state.tilepickerCellSize(), float32(tileGridSize.Y)*state.tilepickerCellSize())
+	gridBounds := rl.NewRectangle(tilepickerView.X+state.tilepickerScroll.X, tilepickerView.Y+state.tilepickerScroll.Y, tilepickerBounds.Width, tilepickerBounds.Height)
 	gridOrigin := rl.NewVector2(gridBounds.X, gridBounds.Y)
 
 	// Tile grid
-	rui.Grid(gridBounds, "Tile", state.tilepickerCellSize(), 1, &mouseCell)
+	rui.Grid(gridBounds, "Tile", cellSize, 1, &mouseCell)
 
 	// Mouse interaction
-	if mouseCell.X >= 0 && mouseCell.Y >= 0 {
+	if rl.CheckCollisionPointRec(rl.GetMousePosition(), tilepickerView) {
 		mouseRec := recTranslate(state.boundsForTilepickerCell(textmode.Cell{int(mouseCell.X), int(mouseCell.Y)}), gridOrigin)
 		rl.DrawRectangleLinesEx(mouseRec, 1.5, hoverColor)
 
@@ -67,10 +71,11 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 	}
 
 	// Tiles
-	rl.DrawRectangleRec(gridBounds, state.palette[state.bgSelection])
-	rl.DrawTexture(state.tileTexture, gridBounds.ToInt32().X, gridBounds.ToInt32().Y, state.palette[state.fgSelection])
+	rl.DrawRectanglePro(gridBounds, rl.Vector2{}, 0, state.palette[state.bgSelection])
+	sourceRec := rl.NewRectangle(0, 0, float32(state.tileTexture.Width), float32(state.tileTexture.Height))
+	rl.DrawTexturePro(state.tileTexture, sourceRec, gridBounds, rl.Vector2{}, 0, state.palette[state.fgSelection])
 
 	// Selected tile
-	selectionRec := recTranslate(state.selectionBounds(), gridOrigin)
+	selectionRec := recTranslate(recTranslate(state.selectionBounds(), gridOrigin), state.tilepickerScroll)
 	rl.DrawRectangleLinesEx(selectionRec, 1.5, selectionColor)
 }
