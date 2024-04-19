@@ -9,17 +9,20 @@ import (
 )
 
 func Canvas(bounds rl.Rectangle, state *State) {
-	rui.DummyRec(bounds, "Canvas")
-
 	if state.image == nil {
 		return
 	}
 
-	var mouseCell rl.Vector2
-
-	gridBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(state.imageSize.X*state.tileSize), float32(state.imageSize.Y*state.tileSize))
+	// Scroll panel
+	canvasBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(state.imageSize.X*state.tileSize), float32(state.imageSize.Y*state.tileSize))
+	canvasView := rl.Rectangle{}
+	rui.ScrollPanel(bounds, "Canvas", canvasBounds, &state.canvasScroll, &canvasView)
+	rl.BeginScissorMode(canvasView.ToInt32().X, canvasView.ToInt32().Y, canvasView.ToInt32().Width, canvasView.ToInt32().Height)
+	defer rl.EndScissorMode()
 
 	// Canvas grid
+	var mouseCell rl.Vector2
+	gridBounds := rl.NewRectangle(canvasView.X, canvasView.Y, canvasBounds.Width, canvasBounds.Height)
 	rui.Grid(gridBounds, "Canvas", float32(state.tileSize), 1, &mouseCell)
 
 	// Mouse interaction
@@ -65,17 +68,18 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	}
 
 	// Canvas image
+	origin := rl.NewVector2(-canvasView.X, -canvasView.Y)
 	for y := 0; y < state.imageSize.Y; y++ {
 		for x := 0; x < state.imageSize.X; x++ {
 			tile, bg, fg := state.image.AtCell(textmode.Cell{x, y})
 			sourceRec := imageRecToRl(state.tileset.BoundsAtIndex(tile))
 			destRec := rl.NewRectangle(float32(x*state.tileSize), float32(y*state.tileSize), float32(state.tileSize), float32(state.tileSize))
-			rl.DrawRectanglePro(destRec, rl.Vector2{}, 0, state.palette[bg])
-			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, rl.Vector2{}, 0, state.palette[fg])
+			rl.DrawRectanglePro(destRec, origin, 0, state.palette[bg])
+			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, origin, 0, state.palette[fg])
 		}
 	}
 
 	// Selection
-	destRec := rl.NewRectangle(float32(state.canvasSelection.X*state.tileSize), float32(state.canvasSelection.Y*state.tileSize), float32(state.tileSize), float32(state.tileSize))
+	destRec := rl.NewRectangle(canvasView.X+float32(state.canvasSelection.X*state.tileSize), canvasView.Y+float32(state.canvasSelection.Y*state.tileSize), float32(state.tileSize), float32(state.tileSize))
 	rl.DrawRectangleLinesEx(destRec, 1.5, selectionColor)
 }
