@@ -32,10 +32,7 @@ func main() {
 	rl.InitWindow(windowBounds.ToInt32().Width, windowBounds.ToInt32().Height, "ohno")
 	defer rl.CloseWindow()
 
-	stateParams := ui.StateParams{
-		TilepickerSpacing: 1,
-	}
-	state := ui.NewState(stateParams)
+	state := ui.State{}
 	state.LoadTileset(rl.LoadImage("assets/tileset.png"), 8)
 	state.NewImage(10, 10, []color.RGBA{
 		{255, 0, 0, 255},

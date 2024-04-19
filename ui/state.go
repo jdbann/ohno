@@ -26,16 +26,6 @@ type State struct {
 	tilepickerSpacing float32
 }
 
-type StateParams struct {
-	TilepickerSpacing float32
-}
-
-func NewState(params StateParams) State {
-	return State{
-		tilepickerSpacing: params.TilepickerSpacing,
-	}
-}
-
 func (s *State) NewImage(w, h int, palette []color.RGBA) {
 	imgPalette := make(color.Palette, len(palette))
 	for i, c := range palette {
