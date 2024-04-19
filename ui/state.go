@@ -22,8 +22,6 @@ type State struct {
 	palette     []color.RGBA
 	bgSelection int
 	fgSelection int
-
-	tilepickerSpacing float32
 }
 
 func (s *State) NewImage(w, h int, palette []color.RGBA) {
@@ -63,11 +61,11 @@ func (s State) boundsForTilepickerCell(cell textmode.Cell) rl.Rectangle {
 }
 
 func (s State) tilepickerCellSize() float32 {
-	return float32(s.tileSize) + s.tilepickerSpacing
+	return float32(s.tileSize)
 }
 
 func (s State) innerBoundsForCoords(cell textmode.Cell) rl.Rectangle {
-	return recTranslate(recAdd(s.boundsForTilepickerCell(cell), rl.NewVector2(-s.tilepickerSpacing, -s.tilepickerSpacing)), rl.NewVector2(s.tilepickerSpacing, s.tilepickerSpacing))
+	return s.boundsForTilepickerCell(cell)
 }
 
 func (s State) selectionBounds() rl.Rectangle {
