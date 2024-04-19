@@ -83,24 +83,3 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 	selectionRec := recTranslate(state.selectionBounds(), gridOrigin)
 	rl.DrawRectangleLinesEx(selectionRec, 1.5, selectionColor)
 }
-
-type TilepickerState struct {
-	Selection int
-	Spacing   float32
-
-	tileset  *textmode.Tileset
-	tileSize int
-	texture  rl.Texture2D
-}
-
-func (s *TilepickerState) LoadTileset(img *rl.Image, size int) {
-	src := img.ToImage()
-	tileset, err := textmode.NewTileset(src, size)
-	if err != nil {
-		panic(err)
-	}
-
-	s.tileset = tileset
-	s.tileSize = tileset.TileSize()
-	s.texture = rl.LoadTextureFromImage(img)
-}
