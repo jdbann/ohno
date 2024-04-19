@@ -17,6 +17,7 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	canvasBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(state.imageSize.X*state.tileSize), float32(state.imageSize.Y*state.tileSize))
 	canvasView := rl.Rectangle{}
 	rui.ScrollPanel(bounds, "Canvas", canvasBounds, &state.canvasScroll, &canvasView)
+	centerScrollPanelContents(bounds, canvasBounds, &canvasView)
 	rl.BeginScissorMode(canvasView.ToInt32().X, canvasView.ToInt32().Y, canvasView.ToInt32().Width, canvasView.ToInt32().Height)
 	defer rl.EndScissorMode()
 
@@ -82,4 +83,25 @@ func Canvas(bounds rl.Rectangle, state *State) {
 	// Selection
 	destRec := rl.NewRectangle(canvasView.X+float32(state.canvasSelection.X*state.tileSize), canvasView.Y+float32(state.canvasSelection.Y*state.tileSize), float32(state.tileSize), float32(state.tileSize))
 	rl.DrawRectangleLinesEx(destRec, 1.5, selectionColor)
+}
+
+const rayguiWindowboxStatusbarHeight = float32(24)
+
+func centerScrollPanelContents(bounds, content rl.Rectangle, view *rl.Rectangle) {
+	borderWidth := float32(rui.GetStyle(rui.DEFAULT, rui.BORDER_WIDTH))
+
+	panelSpace := rl.NewRectangle(
+		bounds.X+borderWidth,
+		bounds.Y+rayguiWindowboxStatusbarHeight,
+		bounds.Width-2*borderWidth,
+		bounds.Height-rayguiWindowboxStatusbarHeight-borderWidth,
+	)
+
+	if content.Width < bounds.Width-2*borderWidth {
+		view.X = (panelSpace.Width - content.Width) / 2
+	}
+
+	if content.Height < panelSpace.Height {
+		view.Y = (panelSpace.Height - content.Height) / 2
+	}
 }
