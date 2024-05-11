@@ -1,0 +1,21 @@
+[
+  {
+    "label": "Launch",
+    "command": "go run .",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Test",
+    "command": "gotestsum",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Test (watch)",
+    "command": "gotestsum",
+    "args": ["--watch"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  }
+]
