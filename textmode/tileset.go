@@ -29,7 +29,7 @@ func NewTileset(src image.Image, tileSize int) (*Tileset, error) {
 	}
 
 	var colors []color.Color
-	img := image.NewPaletted(src.Bounds(), color.Palette{color.Black, color.White})
+	img := image.NewPaletted(src.Bounds(), tilesetPalette())
 
 	for y := srcSize.Min.Y; y < srcSize.Max.Y; y++ {
 		for x := srcSize.Min.X; x < srcSize.Max.X; x++ {
@@ -103,4 +103,8 @@ func (t Tileset) IndexForCell(cell Cell) int {
 
 func (t Tileset) cellInGrid(cell Cell) bool {
 	return cell.In(image.Rectangle{Max: t.gridSize})
+}
+
+func tilesetPalette() color.Palette {
+	return color.Palette{color.Black, color.White}
 }
