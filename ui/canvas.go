@@ -33,21 +33,6 @@ func Canvas(bounds rl.Rectangle, img *textmode.Image, tilesTexture rl.Texture2D,
 		}
 	}
 
-	// Wrap selection within canvas
-	x := selection.X
-	y := selection.Y
-
-	if x < 0 || x >= imgSize.X {
-		x += imgSize.X
-		x = x % imgSize.X
-	}
-	if y < 0 || y >= imgSize.Y {
-		y += imgSize.Y
-		y = y % imgSize.Y
-	}
-
-	*selection = image.Pt(x, y)
-
 	// Draw canvas image
 	origin := rl.NewVector2(-canvasView.X-scroll.X, -canvasView.Y-scroll.Y)
 	for y := 0; y < imgSize.Y; y++ {

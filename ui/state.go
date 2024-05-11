@@ -9,37 +9,23 @@ import (
 )
 
 type State struct {
-	image     *textmode.Image
 	imageSize image.Point
 
-	tileset       *textmode.Tileset
-	tileSize      int
-	TileSelection int
-	TileTexture   rl.Texture2D
-
-	canvasScroll    rl.Vector2
-	canvasSelection image.Point
-
-	tilepickerScroll rl.Vector2
+	tileSize    int
+	TileTexture rl.Texture2D
 
 	palette     []color.RGBA
 	BGSelection int
 	FGSelection int
 }
 
-func (s *State) Image() *textmode.Image {
-	return s.image
-}
-
 func (s *State) SetImage(img *textmode.Image) {
 	tilesetImage := rl.NewImageFromImage(img.Tileset().Image())
 	rl.ImageColorReplace(tilesetImage, color.RGBA{0, 0, 0, 255}, color.RGBA{0, 0, 0, 0})
 
-	s.tileset = img.Tileset()
 	s.tileSize = img.Tileset().TileSize()
 	s.TileTexture = rl.LoadTextureFromImage(tilesetImage)
 
-	s.image = img
 	s.imageSize = img.TileBounds().Size()
 	s.palette = mapSlice(img.Palette(), toRGBA)
 	s.BGSelection = 0
@@ -53,11 +39,6 @@ func (s State) boundsForTilepickerCell(cell textmode.Cell) rl.Rectangle {
 func (s State) cellSize() float32 {
 	zoom := float32(8)
 	return float32(s.tileSize) * zoom
-}
-
-func (s State) selectionBounds() rl.Rectangle {
-	cell := s.tileset.CellForIndex(s.TileSelection)
-	return s.boundsForTilepickerCell(cell)
 }
 
 func imageRecToRl(r image.Rectangle) rl.Rectangle {

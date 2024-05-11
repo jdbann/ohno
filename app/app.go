@@ -30,6 +30,8 @@ var (
 		windowBounds.Width-sidebarWidth, 0,
 		sidebarWidth, windowBounds.Height-colorpickerHeight,
 	)
+	tilepickerSelection = image.Point{}
+	tilepickerScroll    = rl.Vector2{}
 
 	canvasBounds = rl.NewRectangle(
 		0, 0,
@@ -60,21 +62,25 @@ func Run() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
-		ui.Tilepicker(tilepickerBounds, &state)
+		bgColor, fgColor := img.Palette()[state.BGSelection], img.Palette()[state.FGSelection]
+		ui.Tilepicker(tilepickerBounds, img, state.TileTexture, &tilepickerSelection, &tilepickerScroll, zoom, bgColor, fgColor)
 		if ui.Canvas(canvasBounds, img, state.TileTexture, &canvasSelection, &canvasScroll, zoom) {
-			img.Set(canvasSelection.X, canvasSelection.Y, state.TileSelection, state.BGSelection, state.FGSelection)
+			tileIdx := img.Tileset().IndexForCell(textmode.Cell(tilepickerSelection))
+			img.Set(canvasSelection.X, canvasSelection.Y, tileIdx, state.BGSelection, state.FGSelection)
 		}
 		ui.Colorpicker(colorpickerBounds, &state)
 
 		if rl.IsKeyDown(rl.KeyLeftSuper) || rl.IsKeyDown(rl.KeyRightSuper) {
 			switch {
 			case rl.IsKeyPressed(rl.KeyS):
-				saveFile(scope, defaultFilename, state.Image())
+				saveFile(scope, defaultFilename, img)
 			}
 		} else {
 			switch {
 			case rl.IsKeyPressed(rl.KeySpace):
-				img.Set(canvasSelection.X, canvasSelection.Y, state.TileSelection, state.BGSelection, state.FGSelection)
+				tileIdx := img.Tileset().IndexForCell(textmode.Cell(tilepickerSelection))
+				img.Set(canvasSelection.X, canvasSelection.Y, tileIdx, state.BGSelection, state.FGSelection)
+
 			case rl.IsKeyPressed(rl.KeyLeft):
 				canvasSelection.X--
 			case rl.IsKeyPressed(rl.KeyRight):
@@ -83,8 +89,20 @@ func Run() {
 				canvasSelection.Y--
 			case rl.IsKeyPressed(rl.KeyDown):
 				canvasSelection.Y++
+
+			case rl.IsKeyPressed(rl.KeyA):
+				tilepickerSelection.X--
+			case rl.IsKeyPressed(rl.KeyD):
+				tilepickerSelection.X++
+			case rl.IsKeyPressed(rl.KeyW):
+				tilepickerSelection.Y--
+			case rl.IsKeyPressed(rl.KeyS):
+				tilepickerSelection.Y++
 			}
 		}
+
+		canvasSelection = wrapSelection(img.TileBounds().Size(), canvasSelection)
+		tilepickerSelection = wrapSelection(img.Tileset().GridSize(), tilepickerSelection)
 
 		rl.EndDrawing()
 	}
@@ -162,5 +180,12 @@ func saveFile(scope *gap.Scope, name string, img *textmode.Image) {
 
 	if err := textmode.Encode(file, img); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func wrapSelection(bounds, selection image.Point) image.Point {
+	return image.Point{
+		X: (selection.X + bounds.X) % bounds.X,
+		Y: (selection.Y + bounds.Y) % bounds.Y,
 	}
 }
