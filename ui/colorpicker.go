@@ -25,18 +25,18 @@ func Colorpicker(bounds rl.Rectangle, state *State) {
 		newIdx := int(mouseCell.X)
 
 		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
-			state.fgSelection = newIdx
+			state.FGSelection = newIdx
 		}
 
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
-			state.bgSelection = newIdx
+			state.BGSelection = newIdx
 		}
 	}
 
 	// Keyboard interaction
 	if rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift) {
-		x := state.fgSelection % colorGridSize.X
-		y := state.fgSelection / colorGridSize.X
+		x := state.FGSelection % colorGridSize.X
+		y := state.FGSelection / colorGridSize.X
 
 		switch {
 		case rl.IsKeyPressed(rl.KeyA):
@@ -58,11 +58,11 @@ func Colorpicker(bounds rl.Rectangle, state *State) {
 			y = y % colorGridSize.Y
 		}
 
-		state.fgSelection = y*colorGridSize.X + x
+		state.FGSelection = y*colorGridSize.X + x
 	}
 
 	if rl.IsKeyPressed(rl.KeyC) {
-		state.fgSelection, state.bgSelection = state.bgSelection, state.fgSelection
+		state.FGSelection, state.BGSelection = state.BGSelection, state.FGSelection
 	}
 
 	// Colors

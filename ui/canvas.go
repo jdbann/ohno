@@ -8,82 +8,64 @@ import (
 	"github.com/jdbann/ohno/textmode"
 )
 
-func Canvas(bounds rl.Rectangle, state *State) {
-	if state.image == nil {
-		return
-	}
-
-	cellSize := state.cellSize()
+func Canvas(bounds rl.Rectangle, img *textmode.Image, tilesTexture rl.Texture2D, selection *image.Point, scroll *rl.Vector2, zoom float32) bool {
+	cellSize := float32(img.Tileset().TileSize()) * zoom
+	imgSize := img.TileBounds().Size()
 
 	// Scroll panel
-	canvasBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(state.imageSize.X)*cellSize, float32(state.imageSize.Y)*cellSize)
+	canvasBounds := rl.NewRectangle(bounds.X, bounds.Y, float32(imgSize.X)*cellSize, float32(imgSize.Y)*cellSize)
 	canvasView := rl.Rectangle{}
-	rui.ScrollPanel(bounds, "Canvas", canvasBounds, &state.canvasScroll, &canvasView)
+	rui.ScrollPanel(bounds, "Canvas", canvasBounds, scroll, &canvasView)
 	centerScrollPanelContents(bounds, canvasBounds, &canvasView)
 	rl.BeginScissorMode(canvasView.ToInt32().X, canvasView.ToInt32().Y, canvasView.ToInt32().Width, canvasView.ToInt32().Height)
 	defer rl.EndScissorMode()
 
 	// Canvas grid
 	var mouseCell rl.Vector2
-	gridBounds := rl.NewRectangle(canvasView.X+state.canvasScroll.X, canvasView.Y+state.canvasScroll.Y, canvasBounds.Width, canvasBounds.Height)
+	gridBounds := rl.NewRectangle(canvasView.X+scroll.X, canvasView.Y+scroll.Y, canvasBounds.Width, canvasBounds.Height)
 	rui.Grid(gridBounds, "Canvas", cellSize, 1, &mouseCell)
 
-	// Mouse interaction
-	if rl.CheckCollisionPointRec(rl.GetMousePosition(), canvasView) && mouseCell.X >= 0 && mouseCell.Y >= 0 {
+	// Change selection if mouse moved inside canvas
+	if rl.CheckCollisionPointRec(rl.GetMousePosition(), canvasView) {
 		if rl.GetMouseDelta() != rl.NewVector2(0, 0) {
-			state.canvasSelection = image.Pt(int(mouseCell.X), int(mouseCell.Y))
-		}
-
-		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
-			state.image.Set(int(mouseCell.X), int(mouseCell.Y), state.tileSelection, state.bgSelection, state.fgSelection)
+			selection.X = int(mouseCell.X)
+			selection.Y = int(mouseCell.Y)
 		}
 	}
 
-	// Keyboard interaction
-	x := state.canvasSelection.X
-	y := state.canvasSelection.Y
+	// Wrap selection within canvas
+	x := selection.X
+	y := selection.Y
 
-	switch {
-	case rl.IsKeyPressed(rl.KeyLeft):
-		x--
-	case rl.IsKeyPressed(rl.KeyRight):
-		x++
-	case rl.IsKeyPressed(rl.KeyUp):
-		y--
-	case rl.IsKeyPressed(rl.KeyDown):
-		y++
+	if x < 0 || x >= imgSize.X {
+		x += imgSize.X
+		x = x % imgSize.X
+	}
+	if y < 0 || y >= imgSize.Y {
+		y += imgSize.Y
+		y = y % imgSize.Y
 	}
 
-	if x < 0 || x >= state.imageSize.X {
-		x += state.imageSize.X
-		x = x % state.imageSize.X
-	}
-	if y < 0 || y >= state.imageSize.Y {
-		y += state.imageSize.Y
-		y = y % state.imageSize.Y
-	}
+	*selection = image.Pt(x, y)
 
-	state.canvasSelection = image.Pt(x, y)
-
-	if rl.IsKeyPressed(rl.KeySpace) {
-		state.image.Set(state.canvasSelection.X, state.canvasSelection.Y, state.tileSelection, state.bgSelection, state.fgSelection)
-	}
-
-	// Canvas image
-	origin := rl.NewVector2(-canvasView.X-state.canvasScroll.X, -canvasView.Y-state.canvasScroll.Y)
-	for y := 0; y < state.imageSize.Y; y++ {
-		for x := 0; x < state.imageSize.X; x++ {
-			tile, bg, fg := state.image.AtCell(textmode.Cell{x, y})
-			sourceRec := imageRecToRl(state.tileset.BoundsAtIndex(tile))
+	// Draw canvas image
+	origin := rl.NewVector2(-canvasView.X-scroll.X, -canvasView.Y-scroll.Y)
+	for y := 0; y < imgSize.Y; y++ {
+		for x := 0; x < imgSize.X; x++ {
+			tile, bg, fg := img.AtCell(textmode.Cell{x, y})
+			sourceRec := imageRecToRl(img.Tileset().BoundsAtIndex(tile))
 			destRec := rl.NewRectangle(float32(x)*cellSize, float32(y)*cellSize, cellSize, cellSize)
-			rl.DrawRectanglePro(destRec, origin, 0, state.palette[bg])
-			rl.DrawTexturePro(state.tileTexture, sourceRec, destRec, origin, 0, state.palette[fg])
+			rl.DrawRectanglePro(destRec, origin, 0, toRGBA(img.Palette()[bg]))
+			rl.DrawTexturePro(tilesTexture, sourceRec, destRec, origin, 0, toRGBA(img.Palette()[fg]))
 		}
 	}
 
-	// Selection
-	destRec := rl.NewRectangle(-origin.X+float32(state.canvasSelection.X)*cellSize, -origin.Y+float32(state.canvasSelection.Y)*cellSize, cellSize, cellSize)
+	// Draw selection box
+	destRec := rl.NewRectangle(-origin.X+float32(selection.X)*cellSize, -origin.Y+float32(selection.Y)*cellSize, cellSize, cellSize)
 	rl.DrawRectangleLinesEx(destRec, 1.5, selectionColor)
+
+	// Return true if clicking in canvas
+	return rl.CheckCollisionPointRec(rl.GetMousePosition(), canvasView) && rl.IsMouseButtonPressed(rl.MouseButtonLeft)
 }
 
 const rayguiWindowboxStatusbarHeight = float32(24)

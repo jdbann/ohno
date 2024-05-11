@@ -12,7 +12,7 @@ var (
 )
 
 func Tilepicker(bounds rl.Rectangle, state *State) {
-	if state.tileTexture.ID == 0 {
+	if state.TileTexture.ID == 0 {
 		return
 	}
 
@@ -40,14 +40,14 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 		rl.DrawRectangleLinesEx(mouseRec, 1.5, hoverColor)
 
 		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
-			state.tileSelection = state.tileset.IndexForCell(textmode.Cell{int(mouseCell.X), int(mouseCell.Y)})
+			state.TileSelection = state.tileset.IndexForCell(textmode.Cell{int(mouseCell.X), int(mouseCell.Y)})
 		}
 	}
 
 	// Keyboard interaction
 	if !(rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift)) {
-		x := state.tileSelection % tileGridSize.X
-		y := state.tileSelection / tileGridSize.X
+		x := state.TileSelection % tileGridSize.X
+		y := state.TileSelection / tileGridSize.X
 
 		switch {
 		case rl.IsKeyPressed(rl.KeyA):
@@ -68,13 +68,13 @@ func Tilepicker(bounds rl.Rectangle, state *State) {
 			y += tileGridSize.Y
 			y = y % tileGridSize.Y
 		}
-		state.tileSelection = y*tileGridSize.X + x
+		state.TileSelection = y*tileGridSize.X + x
 	}
 
 	// Tiles
-	rl.DrawRectanglePro(gridBounds, rl.Vector2{}, 0, state.palette[state.bgSelection])
-	sourceRec := rl.NewRectangle(0, 0, float32(state.tileTexture.Width), float32(state.tileTexture.Height))
-	rl.DrawTexturePro(state.tileTexture, sourceRec, gridBounds, rl.Vector2{}, 0, state.palette[state.fgSelection])
+	rl.DrawRectanglePro(gridBounds, rl.Vector2{}, 0, state.palette[state.BGSelection])
+	sourceRec := rl.NewRectangle(0, 0, float32(state.TileTexture.Width), float32(state.TileTexture.Height))
+	rl.DrawTexturePro(state.TileTexture, sourceRec, gridBounds, rl.Vector2{}, 0, state.palette[state.FGSelection])
 
 	// Selected tile
 	selectionRec := recTranslate(state.selectionBounds(), gridOrigin)

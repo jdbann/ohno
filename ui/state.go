@@ -14,8 +14,8 @@ type State struct {
 
 	tileset       *textmode.Tileset
 	tileSize      int
-	tileSelection int
-	tileTexture   rl.Texture2D
+	TileSelection int
+	TileTexture   rl.Texture2D
 
 	canvasScroll    rl.Vector2
 	canvasSelection image.Point
@@ -23,8 +23,8 @@ type State struct {
 	tilepickerScroll rl.Vector2
 
 	palette     []color.RGBA
-	bgSelection int
-	fgSelection int
+	BGSelection int
+	FGSelection int
 }
 
 func (s *State) Image() *textmode.Image {
@@ -37,13 +37,13 @@ func (s *State) SetImage(img *textmode.Image) {
 
 	s.tileset = img.Tileset()
 	s.tileSize = img.Tileset().TileSize()
-	s.tileTexture = rl.LoadTextureFromImage(tilesetImage)
+	s.TileTexture = rl.LoadTextureFromImage(tilesetImage)
 
 	s.image = img
 	s.imageSize = img.TileBounds().Size()
 	s.palette = mapSlice(img.Palette(), toRGBA)
-	s.bgSelection = 0
-	s.fgSelection = 1
+	s.BGSelection = 0
+	s.FGSelection = 1
 }
 
 func (s State) boundsForTilepickerCell(cell textmode.Cell) rl.Rectangle {
@@ -56,7 +56,7 @@ func (s State) cellSize() float32 {
 }
 
 func (s State) selectionBounds() rl.Rectangle {
-	cell := s.tileset.CellForIndex(s.tileSelection)
+	cell := s.tileset.CellForIndex(s.TileSelection)
 	return s.boundsForTilepickerCell(cell)
 }
 

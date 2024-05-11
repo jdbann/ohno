@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"image"
 	"image/color"
 	"image/png"
 	"io/fs"
@@ -34,6 +35,10 @@ var (
 		0, 0,
 		windowBounds.Width-sidebarWidth, windowBounds.Height,
 	)
+	canvasSelection = image.Point{}
+	canvasScroll    = rl.Vector2{}
+
+	zoom float32 = 8
 
 	defaultFilename = "canvas.json"
 )
@@ -56,13 +61,28 @@ func Run() {
 		rl.ClearBackground(rl.RayWhite)
 
 		ui.Tilepicker(tilepickerBounds, &state)
-		ui.Canvas(canvasBounds, &state)
+		if ui.Canvas(canvasBounds, img, state.TileTexture, &canvasSelection, &canvasScroll, zoom) {
+			img.Set(canvasSelection.X, canvasSelection.Y, state.TileSelection, state.BGSelection, state.FGSelection)
+		}
 		ui.Colorpicker(colorpickerBounds, &state)
 
 		if rl.IsKeyDown(rl.KeyLeftSuper) || rl.IsKeyDown(rl.KeyRightSuper) {
 			switch {
 			case rl.IsKeyPressed(rl.KeyS):
 				saveFile(scope, defaultFilename, state.Image())
+			}
+		} else {
+			switch {
+			case rl.IsKeyPressed(rl.KeySpace):
+				img.Set(canvasSelection.X, canvasSelection.Y, state.TileSelection, state.BGSelection, state.FGSelection)
+			case rl.IsKeyPressed(rl.KeyLeft):
+				canvasSelection.X--
+			case rl.IsKeyPressed(rl.KeyRight):
+				canvasSelection.X++
+			case rl.IsKeyPressed(rl.KeyUp):
+				canvasSelection.Y--
+			case rl.IsKeyPressed(rl.KeyDown):
+				canvasSelection.Y++
 			}
 		}
 
