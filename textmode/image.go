@@ -53,12 +53,24 @@ func (i Image) ColorModel() color.Model {
 	return i.palette
 }
 
+func (i Image) Palette() color.Palette {
+	return i.palette
+}
+
 func (i *Image) Set(x, y, tile, bg, fg int) error {
 	idx := i.tileToIndex(image.Pt(x, y))
 	i.tiles[idx] = tile
 	i.bgColors[idx] = bg
 	i.fgColors[idx] = fg
 	return nil
+}
+
+func (i Image) TileBounds() image.Rectangle {
+	return image.Rect(0, 0, i.w, i.h)
+}
+
+func (i Image) Tileset() *Tileset {
+	return i.tileset
 }
 
 func (i Image) pxToIndex(pt image.Point) int {

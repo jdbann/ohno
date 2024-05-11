@@ -27,36 +27,23 @@ type State struct {
 	fgSelection int
 }
 
-func (s *State) NewImage(w, h int, palette []color.RGBA) {
-	imgPalette := make(color.Palette, len(palette))
-	for i, c := range palette {
-		imgPalette[i] = c
-	}
-	img, err := textmode.NewImage(w, h, s.tileset, imgPalette)
-	if err != nil {
-		panic(img)
-	}
-
-	s.image = img
-	s.imageSize = image.Pt(w, h)
-	s.palette = palette
-	s.bgSelection = 0
-	s.fgSelection = 1
+func (s *State) Image() *textmode.Image {
+	return s.image
 }
 
-func (s *State) LoadTileset(img *rl.Image, size int) {
-	src := img.ToImage()
-	tileset, err := textmode.NewTileset(src, size)
-	if err != nil {
-		panic(err)
-	}
-
-	tilesetImage := rl.NewImageFromImage(tileset.Image())
+func (s *State) SetImage(img *textmode.Image) {
+	tilesetImage := rl.NewImageFromImage(img.Tileset().Image())
 	rl.ImageColorReplace(tilesetImage, color.RGBA{0, 0, 0, 255}, color.RGBA{0, 0, 0, 0})
 
-	s.tileset = tileset
-	s.tileSize = size
+	s.tileset = img.Tileset()
+	s.tileSize = img.Tileset().TileSize()
 	s.tileTexture = rl.LoadTextureFromImage(tilesetImage)
+
+	s.image = img
+	s.imageSize = img.TileBounds().Size()
+	s.palette = mapSlice(img.Palette(), toRGBA)
+	s.bgSelection = 0
+	s.fgSelection = 1
 }
 
 func (s State) boundsForTilepickerCell(cell textmode.Cell) rl.Rectangle {
@@ -86,5 +73,23 @@ func recTranslate(r rl.Rectangle, v rl.Vector2) rl.Rectangle {
 		Y:      r.Y + v.Y,
 		Width:  r.Width,
 		Height: r.Height,
+	}
+}
+
+func mapSlice[In any, Out any](in []In, fn func(In) Out) []Out {
+	out := make([]Out, len(in))
+	for i, v := range in {
+		out[i] = fn(v)
+	}
+	return out
+}
+
+func toRGBA(in color.Color) color.RGBA {
+	r, g, b, a := in.RGBA()
+	return color.RGBA{
+		uint8(r >> 8),
+		uint8(g >> 8),
+		uint8(b >> 8),
+		uint8(a >> 8),
 	}
 }
